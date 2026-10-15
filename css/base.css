@@ -1,0 +1,1021 @@
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+}
+
+:root {
+  font-size: 13px;
+  --color-text: #f3ede6;
+  --color-text-dim: rgba(243, 237, 230, 0.58);
+  --color-text-faint: rgba(243, 237, 230, 0.36);
+  --color-bg: #050404;
+  --color-link: #f3ede6;
+  --color-link-hover: #f6a84c;
+  --color-amber: #f6a84c;
+  --color-amber-ink: #1a1209;
+  --glass: rgba(20, 17, 16, 0.6);
+  --glass-strong: rgba(14, 12, 11, 0.86);
+  --glass-border: rgba(255, 240, 225, 0.09);
+  --blur: blur(18px) saturate(140%);
+  --page-padding: 1.5rem;
+  --radius: 16px;
+}
+
+body {
+  margin: 0;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'tnum' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+/* Loading: the battery from the film's first shot, charging */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1rem;
+  background: var(--color-bg);
+  transition: opacity 0.9s, visibility 0s 0.9s;
+}
+
+.no-js .loader,
+body:not(.loading) .loader {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader__battery {
+  --charge: #3ff2b5;
+  position: relative;
+  width: 4.6rem;
+  height: 2.1rem;
+  padding: 0.28rem;
+  border: 2px solid rgba(63, 242, 181, 0.85);
+  border-radius: 0.45rem;
+  box-shadow: 0 0 1.2rem rgba(63, 242, 181, 0.18);
+}
+
+.loader__battery::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -0.5rem;
+  width: 0.3rem;
+  height: 0.8rem;
+  margin-top: -0.4rem;
+  border-radius: 0 0.2rem 0.2rem 0;
+  background: rgba(63, 242, 181, 0.85);
+}
+
+.loader__level {
+  display: block;
+  height: 100%;
+  border-radius: 0.2rem;
+  background: var(--charge);
+  box-shadow: 0 0 0.8rem var(--charge);
+  transform: scaleX(0.02);
+  transform-origin: 0 50%;
+}
+
+.loader__percent {
+  color: #3ff2b5;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 0.8rem rgba(63, 242, 181, 0.5);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .loader__level {
+    animation: lowBattery 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes lowBattery {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+a {
+  text-decoration: none;
+  color: var(--color-link);
+  outline: none;
+  cursor: pointer;
+}
+
+a:hover {
+  color: var(--color-link-hover);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 3px;
+}
+
+/* The 3D cinema, full screen */
+.theater {
+  position: fixed;
+  inset: 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.theater canvas {
+  display: block;
+}
+
+.theater.is-over-seat {
+  cursor: pointer;
+}
+
+.theater.is-dragging {
+  cursor: grabbing;
+}
+
+/* Frame */
+.frame {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  padding: var(--page-padding);
+  display: grid;
+  gap: 1rem 2rem;
+  pointer-events: none;
+  align-content: space-between;
+  justify-items: start;
+  grid-template-columns: auto auto 1fr;
+  grid-template-areas:
+    'title links .'
+    'tags tags sponsor';
+}
+
+.frame a {
+  pointer-events: auto;
+}
+
+.frame__title {
+  grid-area: title;
+  font-size: inherit;
+  font-weight: 600;
+  margin: 0;
+}
+
+.frame__links,
+.frame__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.frame__links {
+  grid-area: links;
+}
+
+.frame__tags {
+  grid-area: tags;
+  align-self: end;
+}
+
+.frame__tags a {
+  color: var(--color-text-dim);
+}
+
+/* The sponsor slot, filled on the live site */
+#cdawrap {
+  grid-area: sponsor;
+  justify-self: end;
+  align-self: end;
+  text-align: right;
+  max-width: 300px;
+  pointer-events: auto;
+}
+
+/* The seat panel: preview, map, tickets */
+.panel {
+  position: fixed;
+  z-index: 1100;
+  top: var(--page-padding);
+  right: var(--page-padding);
+  width: 24rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.panel__card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  padding: 0.9rem 1rem;
+}
+
+.panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.panel__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.panel__meta {
+  margin: 0.15rem 0 0;
+  color: var(--color-text-dim);
+}
+
+.panel__close {
+  display: none;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: rgba(255, 240, 225, 0.08);
+}
+
+.panel__close svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+/* The preview window: an empty frame that the 3D view draws into (see preview.js) */
+.preview {
+  position: relative;
+  aspect-ratio: 2.39;
+}
+
+.preview__window {
+  position: absolute;
+  inset: 0;
+  border-radius: 9px;
+  box-shadow: 0 0 0 1px var(--glass-border), 0 1rem 2.5rem rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.preview__empty,
+.preview__caption {
+  position: absolute;
+  margin: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.preview__empty {
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--color-text-faint);
+}
+
+.preview__caption {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1.6rem 0.75rem 0.55rem;
+  border-radius: 0 0 9px 9px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.65));
+  font-weight: 500;
+  opacity: 0;
+}
+
+.is-previewing .preview__empty {
+  opacity: 0;
+}
+
+.is-previewing .preview__caption {
+  opacity: 1;
+}
+
+/* The map */
+.map__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.map__screen {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.map__screen-glow {
+  fill: none;
+  stroke: var(--color-amber);
+  stroke-width: 7;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+
+.map__screen-label,
+.map__best-label,
+.map__row {
+  fill: var(--color-text-faint);
+  font-size: 7px;
+  font-weight: 500;
+  text-anchor: middle;
+}
+
+.map__screen-label {
+  letter-spacing: 0.3em;
+}
+
+.map__best {
+  fill: rgba(246, 168, 76, 0.08);
+  stroke: rgba(246, 168, 76, 0.45);
+  stroke-width: 0.8;
+  stroke-dasharray: 2.5 2;
+}
+
+.map__best-label {
+  fill: rgba(246, 168, 76, 0.85);
+}
+
+.map__seat {
+  fill: rgba(243, 237, 230, 0.26);
+  cursor: pointer;
+  transition: fill 0.15s;
+  outline: none;
+}
+
+.map__seat:hover,
+.map__seat.is-hovered,
+.map__seat:focus-visible {
+  fill: rgba(246, 168, 76, 0.75);
+}
+
+.map__seat:focus-visible {
+  stroke: var(--color-amber);
+  stroke-width: 1.5;
+}
+
+.map__seat.is-ticket {
+  fill: var(--color-amber);
+}
+
+.map__seat.is-current {
+  fill: var(--color-text);
+  stroke: var(--color-amber);
+  stroke-width: 1.6;
+}
+
+.map__seat.is-taken {
+  fill: rgba(243, 237, 230, 0.07);
+  cursor: not-allowed;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-dim);
+  font-size: 0.85rem;
+}
+
+.legend__item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legend__item::before {
+  content: '';
+  width: 0.7rem;
+  height: 0.62rem;
+  border-radius: 2px;
+}
+
+.legend__item--free::before {
+  background: rgba(243, 237, 230, 0.26);
+}
+
+.legend__item--taken::before {
+  background: rgba(243, 237, 230, 0.07);
+}
+
+.legend__item--yours::before {
+  background: var(--color-amber);
+}
+
+.legend__item--best::before {
+  background: rgba(246, 168, 76, 0.08);
+  outline: 1px dashed rgba(246, 168, 76, 0.6);
+}
+
+/* Tickets: stubs with notched sides */
+.tickets__title {
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-dim);
+}
+
+.tickets__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ticket {
+  display: flex;
+  align-items: center;
+  background: rgba(246, 168, 76, 0.16);
+  color: var(--color-text);
+  border-radius: 6px;
+  -webkit-mask: radial-gradient(circle at 0 50%, transparent 4px, #000 4.5px) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 50%, transparent 4px, #000 4.5px) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle at 0 50%, transparent 4px, #000 4.5px) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% 50%, transparent 4px, #000 4.5px) right / 51% 100% no-repeat;
+}
+
+.ticket.is-booked {
+  background: var(--color-amber);
+  color: var(--color-amber-ink);
+}
+
+.ticket__go {
+  display: flex;
+  align-items: baseline;
+  gap: 0.15rem;
+  padding: 0.45rem 0.2rem 0.45rem 0.75rem;
+}
+
+.ticket__row {
+  font-weight: 600;
+}
+
+.ticket__remove {
+  padding: 0.45rem 0.7rem 0.45rem 0.35rem;
+  opacity: 0.6;
+}
+
+.ticket__remove:hover {
+  opacity: 1;
+}
+
+.tickets__empty {
+  margin: 0;
+  color: var(--color-text-faint);
+}
+
+.tickets__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.8rem;
+}
+
+.tickets__total {
+  font-weight: 500;
+}
+
+.tickets__book {
+  padding: 0.6rem 1.3rem;
+  border-radius: 999px;
+  background: var(--color-amber);
+  color: var(--color-amber-ink);
+  font-weight: 600;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.tickets__book:hover:not(:disabled) {
+  background: #ffbf6e;
+}
+
+.tickets__book:disabled {
+  opacity: 0.35;
+}
+
+/* The seat under the pointer */
+.seat-label {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 900;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.seat-label.is-visible {
+  opacity: 1;
+}
+
+.seat-label__pill {
+  position: absolute;
+  left: 0;
+  bottom: 0.6rem;
+  transform: translateX(-50%);
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: var(--color-amber);
+  color: var(--color-amber-ink);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.35);
+}
+
+.seat-label.is-taken .seat-label__pill {
+  background: var(--glass-strong);
+  color: var(--color-text-dim);
+  border: 1px solid var(--glass-border);
+}
+
+/* The dock: the film, your seat, the switches */
+.dock {
+  position: fixed;
+  z-index: 1100;
+  left: 50%;
+  bottom: var(--page-padding);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.45rem 0.5rem 0.45rem 0.45rem;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  white-space: nowrap;
+}
+
+.dock__play {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 50%;
+  background: var(--color-amber);
+  color: var(--color-amber-ink);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.dock__play:hover {
+  background: #ffbf6e;
+}
+
+.dock__play:active {
+  transform: scale(0.94);
+}
+
+.dock__icon {
+  grid-area: 1 / 1;
+  width: 1.35rem;
+  height: 1.35rem;
+  fill: currentColor;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.dock__icon--pause,
+.is-playing .dock__icon--play {
+  opacity: 0;
+  transform: scale(0.6);
+}
+
+.is-playing .dock__icon--pause {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.dock__film {
+  display: grid;
+  line-height: 1.25;
+}
+
+.dock__title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.dock__meta {
+  font-size: 0.8rem;
+  color: var(--color-text-dim);
+}
+
+.dock__divider {
+  width: 1px;
+  height: 1.8rem;
+  background: var(--glass-border);
+}
+
+.dock__status {
+  font-weight: 500;
+  min-width: 9.5rem;
+}
+
+.dock__button {
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  background: rgba(255, 240, 225, 0.08);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.dock__button:hover {
+  background: rgba(255, 240, 225, 0.16);
+}
+
+.dock__add-short {
+  display: none;
+}
+
+.dock__stand-icon {
+  display: none;
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dock__add[aria-pressed='true'] {
+  background: rgba(246, 168, 76, 0.18);
+  color: var(--color-amber);
+}
+
+.dock__fx {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 240, 225, 0.08);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-text-dim);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.dock__fx-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-text-faint);
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.dock__fx[aria-pressed='true'] {
+  color: var(--color-text);
+}
+
+.dock__fx[aria-pressed='true'] .dock__fx-dot {
+  background: var(--color-amber);
+  box-shadow: 0 0 0.6rem var(--color-amber);
+}
+
+.dock__round {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: rgba(255, 240, 225, 0.08);
+  transition: background-color 0.2s;
+}
+
+.dock__round:hover {
+  background: rgba(255, 240, 225, 0.16);
+}
+
+.dock__round svg {
+  grid-area: 1 / 1;
+  width: 1.3rem;
+  height: 1.3rem;
+  fill: currentColor;
+}
+
+.dock__round .stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+.dock__glyph--off,
+.dock__sound[aria-pressed='true'] .dock__glyph--on {
+  display: none;
+}
+
+.dock__sound[aria-pressed='true'] .dock__glyph--off {
+  display: block;
+}
+
+.dock__tilt[aria-pressed='true'] {
+  background: rgba(246, 168, 76, 0.2);
+  color: var(--color-amber);
+}
+
+.dock__seats {
+  display: none;
+}
+
+/* The controls, spelled out */
+.keys {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--page-padding) + 4.4rem);
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem 1.2rem;
+  padding: 0 1rem;
+  color: var(--color-text-dim);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.keys__item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.keys kbd {
+  font: inherit;
+  font-size: 0.8rem;
+  min-width: 1.6rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 5px;
+  text-align: center;
+  color: var(--color-text);
+  background: rgba(20, 17, 16, 0.55);
+  border: 1px solid var(--glass-border);
+  border-bottom-width: 2px;
+}
+
+.keys kbd + kbd {
+  margin-left: -0.15rem;
+}
+
+/* Messages */
+.toast {
+  position: fixed;
+  z-index: 1200;
+  top: var(--page-padding);
+  left: 50%;
+  transform: translate(-50%, -0.5rem);
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-border);
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* Reduced motion: moves are a fade through black */
+.fade {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.film {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.no-3d__message {
+  display: none;
+}
+
+.no-3d .no-3d__message {
+  display: block;
+  position: fixed;
+  top: 50%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: var(--color-text-dim);
+}
+
+.no-3d .dock,
+.no-3d .keys,
+.no-3d .panel {
+  display: none;
+}
+
+@media screen and (max-width: 1180px) {
+  .dock__film,
+  .dock__film + .dock__divider {
+    display: none;
+  }
+}
+
+/* Small screens: the seat map is a sheet that slides up from the bottom */
+@media screen and (max-width: 900px), screen and (max-height: 720px) {
+  .panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-width: 34rem;
+    margin: 0 auto;
+    max-height: 86vh;
+    overflow-y: auto;
+    padding: 0.75rem 0.75rem calc(var(--page-padding) + 5rem);
+    background: var(--glass-strong);
+    border-radius: var(--radius) var(--radius) 0 0;
+    -webkit-backdrop-filter: var(--blur);
+    backdrop-filter: var(--blur);
+    transform: translateY(100%);
+    visibility: hidden;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s 0.35s;
+  }
+
+  .panel.is-open {
+    transform: translateY(0);
+    visibility: visible;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .panel__card {
+    background: rgba(255, 240, 225, 0.04);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .panel__close {
+    display: grid;
+    place-items: center;
+  }
+
+  .preview {
+    display: none;
+  }
+
+  .panel__map .map__svg {
+    max-width: 30rem;
+    margin: 0 auto;
+  }
+
+  .dock__seats {
+    display: grid;
+  }
+}
+
+/* On larger but short screens, the sheet floats above the dock */
+@media screen and (min-width: 641px) and (max-width: 900px), screen and (min-width: 641px) and (max-height: 720px) {
+  .panel {
+    bottom: calc(var(--page-padding) + 4.6rem);
+    max-height: calc(100vh - var(--page-padding) * 2 - 5.5rem);
+    padding-bottom: 0.75rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--glass-border);
+  }
+}
+
+@media screen and (max-width: 640px) {
+  :root {
+    --page-padding: 1rem;
+  }
+
+  .frame {
+    grid-template-columns: 100%;
+    grid-template-areas:
+      'title'
+      'links'
+      'tags'
+      'sponsor';
+    align-content: start;
+  }
+
+  #cdawrap {
+    justify-self: start;
+    text-align: left;
+  }
+
+  /* Two rows: where you are on top, the controls below */
+  .dock {
+    width: calc(100vw - 1rem);
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0.5rem 0.5rem;
+    border-radius: 1.5rem;
+  }
+
+  .dock__divider {
+    display: none;
+  }
+
+  .dock__status {
+    order: -1;
+    flex: 1 1 100%;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .dock__button,
+  .dock__fx {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .dock__add-price,
+  .dock__add-long {
+    display: none;
+  }
+
+  .dock__add-short {
+    display: inline;
+  }
+
+  /* Stand up as an icon, to keep the controls on one row */
+  .dock__stand {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+  }
+
+  .dock__stand-icon {
+    display: block;
+  }
+
+  .dock__stand-label {
+    display: none;
+  }
+
+  .panel {
+    padding-bottom: calc(var(--page-padding) + 7.5rem);
+  }
+
+  .keys {
+    bottom: calc(var(--page-padding) + 7.2rem);
+    font-size: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .panel.is-open,
+  .toast {
+    transition-duration: 0s;
+  }
+}

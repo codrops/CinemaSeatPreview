@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cinema Seat Preview | Codrops</title>
+    <meta name="description" content="Pick a seat in a 3D cinema, fly to it and watch the film from there, with the film lighting the room and 4D effects. Built with three.js and TSL." />
+    <meta name="keywords" content="cinema, seat preview, seating plan, 4d cinema, three.js, webgpu, tsl, 3d" />
+    <meta name="author" content="Codrops" />
+    <link rel="icon" type="image/svg+xml" href="https://tympanus.net/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="https://tympanus.net/favicon/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
+    <link rel="stylesheet" type="text/css" href="css/base.css" />
+    <script>document.documentElement.className = 'js';</script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./js/lib/three.webgpu.js",
+          "three/webgpu": "./js/lib/three.webgpu.js",
+          "three/tsl": "./js/lib/three.tsl.js",
+          "three/addons/": "./js/lib/addons/"
+        }
+      }
+    </script>
+  </head>
+  <body class="loading">
+    <div class="loader" role="progressbar" aria-label="Loading the cinema">
+      <div class="loader__battery"><span class="loader__level"></span></div>
+      <span class="loader__percent">2%</span>
+    </div>
+    <div class="theater" role="img" aria-label="A 3D cinema. Pick a seat in the room or on the seat map to fly there and see the screen from it."></div>
+    <header class="frame">
+      <h1 class="frame__title">Cinema Seat Preview</h1>
+      <nav class="frame__links">
+        <a href="https://tympanus.net/codrops/hub/">All demos</a>
+        <a href="https://github.com/codrops/CinemaSeatPreview">GitHub</a>
+      </nav>
+      <nav class="frame__tags">
+        <a href="https://tympanus.net/codrops/hub/tag/3d/">#3d</a>
+        <a href="https://tympanus.net/codrops/hub/tag/three-js/">#three.js</a>
+        <a href="https://tympanus.net/codrops/hub/tag/webgpu/">#webgpu</a>
+        <a href="https://tympanus.net/codrops/hub/tag/tsl/">#tsl</a>
+      </nav>
+    </header>
+
+    <aside class="panel" aria-label="Seats">
+      <div class="panel__card panel__head">
+        <div>
+          <h2 class="panel__title">Choose your seats</h2>
+          <p class="panel__meta">Charge · Tonight 20:30 · Screen 1</p>
+        </div>
+        <button class="panel__close" type="button" aria-label="Close the seat map">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <div class="preview">
+        <div class="preview__window"></div>
+        <p class="preview__empty">Point at a seat to see its view</p>
+        <p class="preview__caption" aria-live="polite"></p>
+      </div>
+      <div class="panel__card panel__map">
+        <div class="map"></div>
+        <ul class="legend">
+          <li class="legend__item legend__item--free">Free</li>
+          <li class="legend__item legend__item--taken">Taken</li>
+          <li class="legend__item legend__item--yours">Yours</li>
+          <li class="legend__item legend__item--best">Best view</li>
+        </ul>
+      </div>
+      <div class="panel__card tickets">
+        <h3 class="tickets__title">Your tickets</h3>
+        <ul class="tickets__list"></ul>
+        <p class="tickets__empty">Sit in a seat and add it to your tickets.</p>
+        <div class="tickets__footer">
+          <span class="tickets__total"></span>
+          <button class="tickets__book" type="button" disabled>Book</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="seat-label" aria-hidden="true"><span class="seat-label__pill"></span></div>
+
+    <div class="dock">
+      <button class="dock__play" type="button" aria-label="Play the film">
+        <svg class="dock__icon dock__icon--play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" /></svg>
+        <svg class="dock__icon dock__icon--pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>
+      </button>
+      <button class="dock__round dock__stop" type="button" aria-label="Stop the film and bring the lights up" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5" /></svg>
+      </button>
+      <div class="dock__film">
+        <span class="dock__title">Charge</span>
+        <span class="dock__meta">Blender Studio · 2022</span>
+      </div>
+      <span class="dock__divider" aria-hidden="true"></span>
+      <span class="dock__status" aria-live="polite">Pick a seat to see its view</span>
+      <button class="dock__button dock__add" type="button" hidden>Add</button>
+      <button class="dock__button dock__stand" type="button" aria-label="Stand up" hidden>
+        <svg class="dock__stand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18.5V6M6.5 11.5L12 6l5.5 5.5" /></svg>
+        <span class="dock__stand-label">Stand up</span>
+      </button>
+      <span class="dock__divider" aria-hidden="true"></span>
+      <button class="dock__fx" type="button" aria-pressed="true" title="4D effects: fog, smoke, sparks, strobes and seat motion">
+        <span class="dock__fx-label">4D</span><span class="dock__fx-dot" aria-hidden="true"></span>
+      </button>
+      <button class="dock__round dock__sound" type="button" aria-pressed="false" aria-label="Turn the sound off">
+        <svg class="dock__glyph dock__glyph--on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" /><path class="stroke" d="M15.5 9a4 4 0 010 6M18 6.5a7.5 7.5 0 010 11" /></svg>
+        <svg class="dock__glyph dock__glyph--off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" /><path class="stroke" d="M16 9.5l5 5M21 9.5l-5 5" /></svg>
+      </button>
+      <button class="dock__round dock__tilt" type="button" aria-pressed="false" aria-label="Tilt your phone to look around" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect class="stroke" x="7.5" y="3.5" width="9" height="17" rx="2" /><path class="stroke" d="M3 9.5a9 9 0 000 5M21 9.5a9 9 0 010 5" /></svg>
+      </button>
+      <button class="dock__round dock__seats" type="button" aria-label="Seat map">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3v3H4zM10.5 7h3v3h-3zM17 7h3v3h-3zM4 14h3v3H4zM10.5 14h3v3h-3zM17 14h3v3h-3z" /></svg>
+      </button>
+    </div>
+    <p class="keys" aria-label="Controls"></p>
+
+    <div class="toast" role="status" aria-live="polite"></div>
+    <p class="no-3d__message">This demo needs a browser with WebGPU or WebGL 2.</p>
+    <div class="fade" aria-hidden="true"></div>
+    <video class="film" src="assets/charge.mp4" preload="none" playsinline></video>
+    <script src="js/lib/gsap.min.js"></script>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
